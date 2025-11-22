@@ -1,8 +1,10 @@
 from pathlib import Path
 from decouple import config
+from datetime import timedelta
+AUTH_USER_MODEL = 'store.User'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-d$373@or%^$z(fafzuq983e$%=-d30at+7zi2%$sv#qb(mm+*9'
+SECRET_KEY = config('my_secret_key')
 
 DEBUG = True
 ALLOWED_HOSTS = []
@@ -16,6 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'store',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +57,7 @@ DATABASES = {
         'NAME': config('DATABASE'),
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', defualt='localhost'),
+        'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432')
     }
 }
@@ -81,3 +84,16 @@ USE_I18N = True
 USE_TZ = True
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
