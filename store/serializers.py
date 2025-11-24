@@ -1,7 +1,30 @@
 from rest_framework import serializers #type: ignore
-from .models import User
+from decimal import Decimal
+from .models import (
+    User, Category, Product, ProductImage, 
+    Address, Order, OrderItem, Cart, CartItem, Review
+)
 
 class UserSerializers(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id','username','email')
+        fields = ('id','username','email', 'first_name', 'last_name')
+        read_only_fields = ('id',)
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only = True, min_length = 7)
+    password_confirmed = serializers.CharField(write_only = True, min_length = 7)
+    class Meta:
+        model = User
+        fields = ('username','email', 'first_name', 'last_name', 'password', 'password_confirmed')
+    
+    def validate(self, data):
+        if data['password'] != data['password_confirmed']:
+            raise serializers.ValidationError('Passwords do not macth')
+        return data
+    
+    def create(self, validated_data):
+        validated_data.pop('password_confirmed')
+        user = User.objects.create_user(**validated_data)
+        return user
+    
