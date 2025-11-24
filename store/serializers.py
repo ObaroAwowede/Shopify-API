@@ -21,7 +21,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     def validate(self, data):
         if data['password'] != data['password_confirmed']:
-            raise serializers.ValidationError('Passwords do not macth')
+            raise serializers.ValidationError('Passwords do not match')
         return data
     
     def create(self, validated_data):
@@ -78,10 +78,12 @@ class ProductSerializer(serializers.ModelSerializer):
     def validate_price(self, value):
         if value <= 0:
             raise serializers.ValidationError('The price of a product must be more than 0')
+        return value
     
     def validate_stock(self, value):
         if value < 0:
             raise serializers.ValidationError('Stock can not be negative')
+        return value
         
 class Address(serializers.ModelSerializer):
     class Meta:
@@ -104,3 +106,5 @@ class OrderItemSerializer(serializers.ModelSerializer):
     def validate_quantity(self, value):
         if value <= 0:
             raise serializers.ValidationError('Quantity must be more than 0')
+        return value
+        
