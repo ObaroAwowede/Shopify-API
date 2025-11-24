@@ -4,6 +4,7 @@ from .models import (
     User, Category, Product, ProductImage, 
     Address, Order, OrderItem, Cart, CartItem, Review
 )
+from django.db.models import Avg
 
 class UserSerializers(serializers.ModelSerializer):
     class Meta:
@@ -44,3 +45,40 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = ProductImage
         fields = ('id', 'image', 'alt_text', 'created_at')
         read_only_fields = ('id','created_at')
+
+class ProductSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only = True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), 
+        source='category', 
+        write_only=True
+    )
+    images = ProductImageSerializer(many=True, read_only=True)
+    average_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Product
+        fields = (
+            'id', 'name', 'description', 'price', 'stock', 
+            'is_available', 'is_in_stock', 'category', 'category_id',
+            'images', 'average_rating', 'review_count',
+            'created_at', 'updated_at'
+        )
+        read_only_fields = ('id', 'created_at', 'updated_at')
+    
+    #below is the function to calculate the average of all reviews, or return 0 if there are none
+    def get_average_rating(self, obj):
+        result = obj.reviews.aggregate(Avg('rating'))
+        return result['rating__avg'] or 0
+    
+    def get_review_count(self, obj):
+        return obj.reviews.count()
+    
+    def validate_price(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('The price of a product must be more than 0')
+    
+    def validate_stock(self, value):
+        if value < 0:
+            raise serializers.ValidationError('Stock can not be negative')
