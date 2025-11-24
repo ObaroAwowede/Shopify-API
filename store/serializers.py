@@ -82,3 +82,25 @@ class ProductSerializer(serializers.ModelSerializer):
     def validate_stock(self, value):
         if value < 0:
             raise serializers.ValidationError('Stock can not be negative')
+        
+class Address(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = (
+            'id', 'address_type', 'full_name', 'phone_number', 'full_address',
+            'city', 'state', 'postal_code', 'country', 'created_at', 'updated_at'
+        )
+        read_only_fields = ('id', 'created_at', 'updated_at')
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only = True)
+    subtotal = serializers.ReadOnlyField()
+    
+    class Meta:
+        model = OrderItem
+        fields = ('id', 'product', 'product_name', 'quantity', 'price', 'subtotal')
+        read_only_fields = ('id', 'price')
+    
+    def validate_quantity(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('Quantity must be more than 0')
