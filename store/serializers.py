@@ -182,8 +182,8 @@ class OrderSerializer(serializers.ModelSerializer):
         
         #creating the order items and updating stock
         for item in items_data:
-            product = items_data['product']
-            quantity = items_data['quantity']
+            product = item['product']
+            quantity = item['quantity']
                         
             OrderItem.objects.create(
                 order=order,
