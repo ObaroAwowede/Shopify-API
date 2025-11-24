@@ -28,3 +28,19 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
     
+class CategorySerializer(serializers.ModelSerializer):
+    product_total = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Category
+        fields = ('id', 'name', 'description', 'product_total', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'created_at', 'updated_at')
+    
+    def get_product_total(self, obj):
+        return obj.products.filter(is_available=True).count()
+    
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ('id', 'image', 'alt_text', 'created_at')
+        read_only_fields = ('id','created_at')
