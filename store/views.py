@@ -1,11 +1,11 @@
 from django.shortcuts import render  # type: ignore
-from rest_framework import generics, permissions, status, viewsets # type: ignore
+from rest_framework import generics, permissions, status, viewsets, filters # type: ignore
 from rest_framework.decorators import action # type: ignore
 from rest_framework.response import Response # type: ignore
 from rest_framework_simplejwt.tokens import RefreshToken # type: ignore
 from .serializers import UserRegistrationSerializer, UserSerializer, CategorySerializer
 from .models import User, Category, Cart, CartItem, Product, ProductImage, Address, Order, OrderItem, Review
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import PageNumberPagination # type: ignore
 
 def get_token_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -48,3 +48,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permissions = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = ResultPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    ordering_fields = ['name', 'description']
+    search_fields = ['name', 'created_at']
+    ordering = ['name']
