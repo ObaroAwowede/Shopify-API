@@ -4,7 +4,7 @@ from .models import (
     User, Category, Product, ProductImage, 
     Address, Order, OrderItem, Cart, CartItem, Review
 )
-from django.db.models import Avg
+from django.db.models import Avg # type: ignore
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
