@@ -5,6 +5,7 @@ from rest_framework.response import Response # type: ignore
 from rest_framework_simplejwt.tokens import RefreshToken # type: ignore
 from .serializers import UserRegistrationSerializer, UserSerializer, CategorySerializer
 from .models import User, Category, Cart, CartItem, Product, ProductImage, Address, Order, OrderItem, Review
+from rest_framework.pagination import PageNumberPagination
 
 def get_token_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -12,6 +13,11 @@ def get_token_for_user(user):
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
+
+class ResultPagination(PageNumberPagination):
+    page_size = 15
+    page_size_query_param = 'page_size'
+    max_page_size = 50
 
 class UserRegisterView(generics.GenericAPIView):
     serializer_class = UserRegistrationSerializer
