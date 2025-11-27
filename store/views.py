@@ -142,7 +142,12 @@ class OrderViewSet(viewsets.ModelViewSet):
     #here i'm creating a custom endpoint called cancel, accepting only PATCH requests
     @action(detail=True, methods=['patch'])
     def cancel(self, request, pk=None):
-        order = self.get_object()       
+        order = self.get_object()   
+        if order.order_status == 'cancelled':
+            return Response(
+                {'message': 'Order is already cancelled.'},
+                status=status.HTTP_200_OK
+            )    
         if order.order_status in ['shipped', 'delivered']:
             return Response(
                 {'error': 'You can not cancel an order that has been shipped or delivered.'},
