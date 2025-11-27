@@ -283,6 +283,28 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.items.all().delete()
         serializer = self.get_serializer(cart)
         return Response(serializer.data)
+    
+    # an endoint to create order from current cart
+    @action(detail=False, methods=['post'])
+    def checkout(self, request):
+        cart = Cart.objects.get(user=request.user)
+        # Convert cart items to order items format
+        items_data = [
+            {'product': item.product.id, 'quantity': item.quantity}
+            for item in cart.items.all()
+        ]
+        order_data = {
+            'shipping_address_id': request.data.get('shipping_address_id'),
+            'billing_address_id': request.data.get('billing_address_id'),
+            'shipping_cost': request.data.get('shipping_cost', 0),
+            'items_data': items_data
+        }
+        serializer = OrderSerializer(data=order_data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        order = serializer.save()
+        # Clearing cart after checkout
+        cart.items.all().delete()
+        return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
