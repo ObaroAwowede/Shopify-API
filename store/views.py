@@ -26,6 +26,11 @@ class ProductPagination(PageNumberPagination):
     max_page_size = 30
 
 class UserRegisterView(generics.GenericAPIView):
+    """
+    API Endpoint for registering.
+    create: 
+    Create a new account
+    """
     serializer_class = UserRegistrationSerializer
     permission_classes = [permissions.AllowAny]
     
@@ -41,6 +46,18 @@ class UserRegisterView(generics.GenericAPIView):
         }, status=status.HTTP_201_CREATED)
         
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint for viewing user profiles.
+    
+    list:
+    Get a list of all users. Requires authentication.
+    
+    retrieve:
+    Get details of a specific user by ID. Requires authentication.
+    
+    me:
+    Get the current authenticated user's profile.
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -51,6 +68,27 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
     
 class CategoryViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for managing product categories.
+    
+    list:
+    Get all categories with product count. Supports search and ordering.
+    
+    create:
+    Create a new category. Requires authentication.
+    
+    retrieve:
+    Get details of a specific category.
+    
+    update:
+    Update a category. Requires authentication.
+    
+    partial_update:
+    Partially update a category. Requires authentication.
+    
+    destroy:
+    Delete a category. Requires authentication. Note: Cannot delete categories with products.
+    """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -61,6 +99,33 @@ class CategoryViewSet(viewsets.ModelViewSet):
     ordering = ['name']
 
 class ProductViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for managing products.
+    
+    list:
+    Return a list of all products with filtering, sorting, and pagination.
+    
+    create:
+    Create a new product. Requires authentication.
+    
+    retrieve:
+    Return details of a specific product including images, ratings, and reviews.
+    
+    update:
+    Update a product. Only authenticated users can modify products.
+    
+    partial_update:
+    Partially update a product (e.g., change only price or stock).
+    
+    destroy:
+    Delete a product. Requires authentication.
+    
+    featured:
+    Get the 10 most recently added products.
+    
+    reviews:
+    Get all reviews for a specific product.
+    """
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -106,6 +171,27 @@ class ProductViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
 class ProductImageViewset(viewsets.ModelViewSet):
+    """
+    API endpoint for managing product images.
+    
+    list:
+    Get all product images. Can filter by product ID.
+    
+    create:
+    Upload a new product image. Requires authentication.
+    
+    retrieve:
+    Get details of a specific product image.
+    
+    update:
+    Update a product image. Requires authentication.
+    
+    partial_update:
+    Partially update a product image. Requires authentication.
+    
+    destroy:
+    Delete a product image. Requires authentication.
+    """
     queryset = ProductImage.objects.all()
     serializer_class = ProductImageSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -113,6 +199,29 @@ class ProductImageViewset(viewsets.ModelViewSet):
     filterset_fields = ['product']
     
 class AddressViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for managing user addresses.
+    
+    Users can only view and manage their own addresses.
+    
+    list:
+    Get all addresses for the current user. Requires authentication.
+    
+    create:
+    Create a new address. Requires authentication. Address is automatically associated with current user.
+    
+    retrieve:
+    Get details of a specific address. Requires authentication and ownership.
+    
+    update:
+    Update an address. Requires authentication and ownership.
+    
+    partial_update:
+    Partially update an address. Requires authentication and ownership.
+    
+    destroy:
+    Delete an address. Requires authentication and ownership.
+    """
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -124,6 +233,33 @@ class AddressViewSet(viewsets.ModelViewSet):
         return Address.objects.filter(user=self.request.user)
     
 class OrderViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for managing orders.
+    
+    Users can only view and manage their own orders.
+    
+    list:
+    Get all orders for the current user. Supports filtering by status and ordering.
+    
+    create:
+    Create a new order manually (alternative to checkout). Requires authentication.
+    Automatically calculates totals and reduces stock.
+    
+    retrieve:
+    Get details of a specific order including all items. Requires authentication and ownership.
+    
+    update:
+    Update an order. Requires authentication and ownership.
+    
+    partial_update:
+    Partially update an order (e.g., update status or notes). Requires authentication and ownership.
+    
+    destroy:
+    Delete an order. Requires authentication and ownership.
+    
+    cancel:
+    Cancel an order and restore product stock. Only pending/processing orders can be cancelled.
+    """
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = ResultPagination
@@ -166,6 +302,32 @@ class OrderViewSet(viewsets.ModelViewSet):
 
 
 class CartViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for managing shopping cart.
+    
+    Each user has one cart that persists across sessions.
+    
+    list:
+    Get the current user's cart (same as my_cart).
+    
+    my_cart:
+    Get the current user's cart with all items and totals.
+    
+    add_item:
+    Add an item to the cart. If item already exists, increases quantity.
+    
+    update_item:
+    Update the quantity of an item in the cart. Set quantity to 0 to remove.
+    
+    remove_item:
+    Remove a specific item from the cart.
+    
+    clear:
+    Remove all items from the cart.
+    
+    checkout:
+    Create an order from cart items and clear the cart.
+    """
     serializer_class = CartSerializer
     permission_classes = [permissions.IsAuthenticated]
     
@@ -308,6 +470,30 @@ class CartViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for managing product reviews.
+    
+    Users can only edit/delete their own reviews.
+    Each user can write only one review per product.
+    
+    list:
+    Get all reviews. Supports filtering by product and rating.
+    
+    create:
+    Create a new product review. Requires authentication.
+    
+    retrieve:
+    Get details of a specific review.
+    
+    update:
+    Update a review. Requires authentication and ownership.
+    
+    partial_update:
+    Partially update a review. Requires authentication and ownership.
+    
+    destroy:
+    Delete a review. Requires authentication and ownership.
+    """
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
