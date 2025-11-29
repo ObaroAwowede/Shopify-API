@@ -44,7 +44,7 @@ class UserRegisterView(generics.GenericAPIView):
             'access': tokens['access'],
             'refresh': tokens['refresh'],
         }, status=status.HTTP_201_CREATED)
-        
+           
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint for viewing user profiles.
