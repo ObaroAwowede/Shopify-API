@@ -301,7 +301,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class CartViewSet(viewsets.ModelViewSet):
+class CartViewSet(viewsets.GenericViewSet):
     """
     API endpoint for managing shopping cart.
     
