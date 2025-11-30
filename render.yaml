@@ -1,0 +1,25 @@
+yamldatabases:
+  - name: shopify-db
+    databaseName: shopify_db
+    user: shopify_user
+    plan: free
+    ipAllowList: []
+
+services:
+  - type: web
+    name: shopify-api
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn shopify_api.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.10.0"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: shopify-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"

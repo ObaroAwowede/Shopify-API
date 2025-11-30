@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import dj_database_url
 from decouple import config
 from datetime import timedelta
 AUTH_USER_MODEL = 'store.User'
@@ -8,7 +9,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('my_secret_key')
 
 DEBUG = True
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'DoubleAPI.pythonanywhere.com').split(',')
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.onrender.com',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -54,16 +59,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'shopify_api.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DATABASE'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432')
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DATABASE'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='5432')
+        }
+    }
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -92,6 +106,9 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
