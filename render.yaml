@@ -1,4 +1,4 @@
-yamldatabases:
+databases:
   - name: shopify-db
     databaseName: shopify_db
     user: shopify_user
