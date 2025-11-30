@@ -6,7 +6,7 @@ from datetime import timedelta
 AUTH_USER_MODEL = 'store.User'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config('my_secret_key')
+SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = True
 ALLOWED_HOSTS = [
