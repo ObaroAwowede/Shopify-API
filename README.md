@@ -972,7 +972,7 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 ## Notes
 
-* Access tokens expire after 15 minutes
+* Access tokens expire after 60 minutes
 * Refresh tokens expire after 7 days
 * Stock is automatically reduced when orders are created
 * Stock is automatically restored when orders are cancelled
