@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('address_type', models.CharField(choices=[('shipping', 'Shipping'), ('billing', 'Billing')], max_length=10)),
                 ('full_name', models.CharField(max_length=255)),
                 ('phone_number', models.CharField(max_length=20)),
-                ('full_address', models.CharField(max_length=255)),
+
                 ('city', models.CharField(max_length=100)),
                 ('state', models.CharField(max_length=100)),
                 ('postal_code', models.CharField(max_length=20)),

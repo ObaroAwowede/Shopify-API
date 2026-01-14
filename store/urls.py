@@ -26,3 +26,4 @@ urlpatterns = [
     path('register/', UserRegisterView.as_view(), name='user-register-view'),
     path('', include(router.urls)),
 ]
+

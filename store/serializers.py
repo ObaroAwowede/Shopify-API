@@ -41,6 +41,7 @@ class CategorySerializer(serializers.ModelSerializer):
         return obj.products.filter(is_available=True).count()
     
 class ProductImageSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(use_url=True)
     class Meta:
         model = ProductImage
         fields = ('id', 'image', 'alt_text', 'created_at')
@@ -89,19 +90,20 @@ class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = (
-            'id', 'address_type', 'full_name', 'phone_number', 'full_address',
+            'id', 'address_type', 'full_address', 'phone_number',
             'city', 'state', 'postal_code', 'country', 'created_at', 'updated_at'
         )
         read_only_fields = ('id', 'created_at', 'updated_at')
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only = True)
-    subtotal = serializers.ReadOnlyField()
+    # subtotal = serializers.ReadOnlyField()
+    productimage = ProductImageSerializer(read_only=True)
     
     class Meta:
         model = OrderItem
-        fields = ('id', 'product', 'product_name', 'quantity', 'price', 'subtotal')
-        read_only_fields = ('id', 'price')
+        fields = ('id', 'product', 'product_name', 'quantity', 'price', 'subtotal', 'productimage')
+        read_only_fields = ('id', 'price', 'subtotal', 'productimage')
     
     def validate_quantity(self, value):
         if value <= 0:
@@ -116,12 +118,14 @@ class OrderSerializer(serializers.ModelSerializer):
     shipping_address_id = serializers.PrimaryKeyRelatedField(
         queryset=Address.objects.all(),
         source='shipping_address',
+        
         write_only=True
     )
     billing_address_id = serializers.PrimaryKeyRelatedField(
         queryset=Address.objects.all(),
         source='billing_address',
         write_only=True,
+        
         required=False
     )
     user_info = UserSerializer(source='user',read_only=True)
@@ -134,9 +138,9 @@ class OrderSerializer(serializers.ModelSerializer):
             'billing_address', 'shipping_address_id', 'billing_address_id',
             'order_status', 'payment_status', 'subtotal', 'shipping_cost', 
             'total', 'notes', 'items', 'items_data', 'item_count',
-            'created_at', 'updated_at'
+            'created_at', 'updated_at',
         )
-        read_only_fields = ('id', 'order_number', 'subtotal', 'total', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'order_number', 'subtotal', 'total', 'created_at', 'updated_at', 'user_info')
     
     def get_item_count(self, obj):
         return obj.items.count()
@@ -156,6 +160,7 @@ class OrderSerializer(serializers.ModelSerializer):
             product = item['product']
             quantity = item['quantity']
             
+            
             #checking if stock quantity ordered is available
             if product.stock < quantity:
                 raise serializers.ValidationError(
@@ -172,6 +177,8 @@ class OrderSerializer(serializers.ModelSerializer):
         if 'billing_address' not in validated_data:
             validated_data['billing_address'] = validated_data['shipping_address']
         
+        
+        validated_data.pop('user', None)
         #creating the order
         order = Order.objects.create(
             user=user,
@@ -184,16 +191,19 @@ class OrderSerializer(serializers.ModelSerializer):
         for item in items_data:
             product = item['product']
             quantity = item['quantity']
-                        
+                     
+            primary_image = product.images.first()   
+            
             OrderItem.objects.create(
                 order=order,
                 product=product,
                 quantity=quantity,
-                price=product.price
+                price=product.price,
+                productimage=primary_image
             )
             
             product.stock = product.stock - quantity
-            product.save()
+            product.save(update_fields=['stock'])
         return order
     
 class CartItemSerializer(serializers.ModelSerializer):

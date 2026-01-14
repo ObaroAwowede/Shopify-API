@@ -393,12 +393,12 @@ class CartViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['patch'])
     def update_item(self, request):
         cart = self.get_object()
-        product_id = request.data.get('product_id')
+        item_id = request.data.get('item_id')
         quantity = request.data.get('quantity')
         
         # i included this try except block, to 
         try:
-            cart_item = CartItem.objects.get(cart=cart, product_id=product_id)
+            cart_item = CartItem.objects.get(cart=cart, id=item_id)
         except CartItem.DoesNotExist:
             return Response(
                 {'error': 'Cart item not found.'},
@@ -420,14 +420,14 @@ class CartViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(cart)
         return Response(serializer.data)
     
-    #creating an endpoint to delete an item from the cart, using it's product_id
+    #creating an endpoint to delete an item from the cart, using it's item_id
     @action(detail=False, methods=['delete'])
     def remove_item(self, request):
         cart = self.get_object()
-        product_id = request.data.get('product_id')
+        item_id = request.data.get('item_id')
         
         try:
-            cart_item = CartItem.objects.get(cart=cart, product_id=product_id)
+            cart_item = CartItem.objects.get(cart=cart, id=item_id)
             cart_item.delete()
         except CartItem.DoesNotExist:
             return Response(

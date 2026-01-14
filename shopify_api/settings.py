@@ -6,6 +6,9 @@ from datetime import timedelta
 AUTH_USER_MODEL = 'store.User'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/media/"
+
 SECRET_KEY = config('my_secret_key')
 
 DEBUG = True
@@ -148,4 +151,15 @@ SWAGGER_SETTINGS = {
         'delete',
         'patch'
     ],
+}
+
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {"location": MEDIA_ROOT},
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
 }
