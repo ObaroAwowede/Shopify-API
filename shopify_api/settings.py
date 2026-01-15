@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"
 
-SECRET_KEY = config('my_secret_key')
+SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = True
 ALLOWED_HOSTS = [
